@@ -1,5 +1,6 @@
 package id.gifood.buttonbackground;
 
+import android.content.SharedPreferences;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,16 @@ public class MainActivity extends AppCompatActivity {
     // Text view to display both count and color.
     private TextView mShowCountTextView;
 
+    // Key for current count
+    private final String COUNT_KEY = "count";
+    // Key for current color
+    private final String COLOR_KEY = "color";
+
+    // Shared preferences object
+    private SharedPreferences mPreferences;
+    // Name of shared preferences file
+    private static final String mSharedPrefFile = "id.gifood.buttonbackground";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,6 +35,23 @@ public class MainActivity extends AppCompatActivity {
         // Initialize views, color, preferences
         mShowCountTextView = (TextView) findViewById(R.id.count_textview);
         mColor = ContextCompat.getColor(this, R.color.default_background);
+        mPreferences = getSharedPreferences(mSharedPrefFile, MODE_PRIVATE);
+
+        // Restore preferences
+        mCount = mPreferences.getInt(COUNT_KEY, 0);
+        mShowCountTextView.setText(String.format("%s", mCount));
+        mColor = mPreferences.getInt(COLOR_KEY, mColor);
+        mShowCountTextView.setBackgroundColor(mColor);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+        preferencesEditor.putInt(COUNT_KEY, mCount);
+        preferencesEditor.putInt(COLOR_KEY, mColor);
+        preferencesEditor.apply();
     }
 
     /**
@@ -65,5 +93,10 @@ public class MainActivity extends AppCompatActivity {
         // Reset color
         mColor = ContextCompat.getColor(this, R.color.default_background);
         mShowCountTextView.setBackgroundColor(mColor);
+
+        // Clear preferences
+        SharedPreferences.Editor preferencesEditor = mPreferences.edit();
+        preferencesEditor.clear();
+        preferencesEditor.apply();
     }
 }
